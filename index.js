@@ -20,6 +20,7 @@ async function run() {
   try {
     client.connect();
     const productCollection = client.db("manufacturer").collection("product");
+    const orderCollection = client.db("manufacturer").collection("orders");
 
     app.get('/product', async(req, res) => {
       const query = {};
@@ -32,6 +33,13 @@ async function run() {
       const id = req.params.id;
       const quary = {_id: ObjectId(id)};
       const result = await productCollection.findOne(quary);
+      res.send(result)
+    })
+    // order product
+    app.post('/orders', async(req, res) => {
+      const order = req.body;
+      console.log(order)
+      const result = await orderCollection.insertOne(order)
       res.send(result)
     })
   } finally {
