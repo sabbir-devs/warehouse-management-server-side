@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
+const jwt = require('jsonwebtoken');
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -22,6 +23,7 @@ async function run() {
     const productCollection = client.db("manufacturer").collection("product");
     const orderCollection = client.db("manufacturer").collection("orders");
     const reviewCollection = client.db("manufacturer").collection("review");
+    const userCollection = client.db("manufacturer").collection("user");
 
     app.get('/product', async(req, res) => {
       const query = {};
@@ -65,6 +67,7 @@ async function run() {
       res.send(result)
     })
 
+    
     // add review 
     app.post('/reviews', async(req, res) => {
       const review = req.body;
@@ -77,6 +80,23 @@ async function run() {
       const result = await reviewCollection.find(query).toArray()
       res.send(result)
     })
+
+    // add user 
+    app.put('/user/:email', async(req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = {email: email};
+      const options = {upsert: true};
+      const updateDoc = {
+        $set: user,
+      }
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result)
+    })
+
+
+
+
   } finally {
 
   }
