@@ -49,16 +49,19 @@ async function run() {
       const result = await orderCollection.find().toArray();
       res.send(result)
     })
+
     // My ordrs
     app.get('/myOrders', async(req, res) => {
-      const email = req.query.email 
-      console.log(email)
-      const query = {email: email};
-      console.log(query)
-      const cursor = orderCollection.find(query)
-      const result = await cursor.toArray()
-      res.send(result) 
+      const customerEmail = req.query.customerEmail;
+      console.log('customer email', customerEmail)
+      const authorization = req.headers.authorization;
+      console.log('auth header', authorization)
+      const query = {customerEmail: customerEmail}
+      const result = await orderCollection.find(query).toArray();
+      res.send(result)
+      
     })
+
     // delete orders
     app.delete('/myOrders/:id', async(req, res) => {
       const id = req.params.id
