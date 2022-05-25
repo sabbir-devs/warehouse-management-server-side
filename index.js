@@ -116,6 +116,7 @@ async function run() {
       res.send(result);
     });
 
+
     // add user from login
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -133,12 +134,42 @@ async function run() {
       );
       res.send({ result, token });
     });
+
+
     // get all user 
-    app.get('/user', async(req,res) => {
+    app.get('/user',verifyJWT, async(req,res) => {
       const query = {};
       const result = await userCollection.find(query).toArray();
       res.send(result);
     })
+
+    // make user admin
+    app.put("/user/admin/:email",verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const requester = req.decoded.email;
+      const requesterAccout = await userCollection.findOne({email: requester});
+      if(requesterAccout.role === 'admin'){
+        const filter = { email: email };
+        const updateDoc = {
+          $set: {role:'admin'},
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        return res.send(result);
+      }
+      else{
+        res.status(403).send({message: 'forbiden access'})
+      }
+    });
+
+    // is user is admin?
+    app.get('/user/:email', async(req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({email: email});
+      const isAdmin = user.role === 'admin';
+      res.send({admin: isAdmingit})
+    })
+
+
   } finally {
   }
 }
