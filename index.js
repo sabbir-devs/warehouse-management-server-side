@@ -162,11 +162,11 @@ async function run() {
     });
 
     // is user is admin?
-    app.get('/user/:email', async(req, res) => {
+    app.get('/admin/:email', async(req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({email: email});
       const isAdmin = user.role === 'admin';
-      res.send({admin: isAdmingit})
+      res.send({admin: isAdmin})
     })
 
 
