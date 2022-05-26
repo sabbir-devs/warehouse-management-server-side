@@ -39,6 +39,7 @@ async function run() {
     const orderCollection = client.db("manufacturer").collection("orders");
     const reviewCollection = client.db("manufacturer").collection("review");
     const userCollection = client.db("manufacturer").collection("user");
+    const paymentCollection = client.db("manufacturer").collection("payment");
 
 
     // Admin verification 
@@ -67,7 +68,7 @@ async function run() {
     });
 
 
-    app.get("/product", async (req, res) => {
+    app.get("/product", verifyJWT, async (req, res) => {
       const query = {};
       const cursor = productCollection.find(query);
       const result = await cursor.toArray();
@@ -75,7 +76,7 @@ async function run() {
     });
 
     // single product
-    app.get("/seeDetails/:id", async (req, res) => {
+    app.get("/seeDetails/:id",verifyJWT, async (req, res) => {
       const id = req.params.id;
       const quary = { _id: ObjectId(id) };
       const result = await productCollection.findOne(quary);
@@ -83,7 +84,7 @@ async function run() {
     });
 
     // add product
-    app.post("/product", async (req, res) => {
+    app.post("/product", verifyJWT, async (req, res) => {
       const product = req.body;
       const result = await productCollection.insertOne(product);
       res.send(result);
@@ -104,7 +105,7 @@ async function run() {
       res.send(result);
     });
     // all oders
-    app.get("/orders", async (req, res) => {
+    app.get("/orders",verifyJWT, async (req, res) => {
       const result = await orderCollection.find().toArray();
       res.send(result);
     });
@@ -128,6 +129,37 @@ async function run() {
       const query = {_id: ObjectId(id)};
       const result = await orderCollection.findOne(query)
       res.send(result)
+    })
+
+    // update orders payment
+    app.patch('/orders/:id', verifyJWT, async(req, res) => {
+      const id = req.params.id;
+      const payment = req.body
+      const filter = {_id: ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId
+        },
+      };
+      const result = await paymentCollection.insertOne(payment)
+      const updatedOrder = await orderCollection.updateOne(filter, updateDoc);
+      res.send(updatedOrder)
+    })
+
+    // update orders delifered confirmation
+    app.patch('/ordersDeliver/:id', verifyJWT, async(req, res) => {
+      const id = req.params.id;
+      const payment = req.body
+      const filter = {_id: ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          deliver: true,
+        },
+      };
+      const result = await paymentCollection.insertOne(payment)
+      const updatedOrder = await orderCollection.updateOne(filter, updateDoc);
+      res.send(updatedOrder)
     })
 
     // delete orders
