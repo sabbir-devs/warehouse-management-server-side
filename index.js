@@ -1,3 +1,4 @@
+// extarnal imports
 const express = require("express");
 const app = express();
 require("dotenv").config();
@@ -7,8 +8,15 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+
+// internal imports
+const productRoutes = require('./routes/product.route');
+const verifyJWT = require("./utiliti/verifyJWT");
+
 app.use(cors());
 app.use(express.json());
+
+// app.use("/product", productRoutes)
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yms1t.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -19,20 +27,21 @@ const client = new MongoClient(uri, {
 
 // check my new branch
 
-function verifyJWT(req, res, next) {
-  const autHeader = req.headers.authorization;
-  if (!autHeader) {
-    return res.status(401).send({ message: "UnAuthorized access" });
-  }
-  const token = autHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-    if (err) {
-      return res.status(403).send({ message: "Forbidden access" });
-    }
-    req.decoded = decoded;
-    next();
-  });
-}
+// verifyJWT
+// function verifyJWT(req, res, next) {
+//   const autHeader = req.headers.authorization;
+//   if (!autHeader) {
+//     return res.status(401).send({ message: "UnAuthorized access" });
+//   }
+//   const token = autHeader.split(" ")[1];
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+//     if (err) {
+//       return res.status(403).send({ message: "Forbidden access" });
+//     }
+//     req.decoded = decoded;
+//     next();
+//   });
+// }
 
 async function run() {
   try {
@@ -268,6 +277,10 @@ run().catch(console.dir);
 app.get("/", (req, res) => {
   res.send("hello from manufacturer server");
 });
+
+app.all("*",(req,res) => {
+  res.send("No Route Found")
+})
 
 app.listen(port, () => {
   console.log("manufacturer is running on port", port);
